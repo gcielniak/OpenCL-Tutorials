@@ -1,7 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "CL/cl.h"
+#ifdef __APPLE__
+    #include "OpenCL/opencl.h"
+#else
+    #include "CL/cl.h"
+#endif
 
 std::string GetPlatformName (cl_platform_id id)
 {
@@ -41,8 +45,8 @@ int main()
 {
 	cl_uint platformIdCount = 0;
 	cl_uint deviceIdCount = 0;
-	cl_uint platform = -1;
-	cl_uint device = -1;
+	cl_int platform = 0;
+	cl_int device = 0;
 
 	clGetPlatformIDs (0, nullptr, &platformIdCount);
 
