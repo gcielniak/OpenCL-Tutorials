@@ -122,10 +122,45 @@ void CheckError(cl_int error)
 	}
 }
 
+enum VerboseLevel
+{
+	VERBOSE_OFF,
+	VERBOSE_BRIEF,
+	VERBOSE_DETAILED,
+	VERBOSE_FULL
+};
+
 using namespace std;
 
-int main()
+void print_help()
 {
+	cerr << "OpenCLTutorial usage:" << endl;
+
+	cerr << "  -v : verbose level [0, 1, 2, 3]" << endl;
+	cerr << "  -h : print this message" << endl;
+}
+
+
+int main(int argc, char **argv)
+{
+	if (argc == 1)
+	{
+		print_help();
+		exit(0);
+	}
+
+	VerboseLevel verbose_level = VERBOSE_OFF;
+	int platform_id = 0;
+	int device_id = 0;
+
+	for (int i = 1; i < argc; i++)
+	{
+		if ((strcmp(argv[i], "-p") == 0) && (i < (argc - 1))) { platform_id = atoi(argv[++i]); }
+		else if ((strcmp(argv[i], "-d") == 0) && (i < (argc - 1))) { device_id = atoi(argv[++i]); }
+		else if ((strcmp(argv[i], "-v") == 0) && (i < (argc - 1))) { verbose_level = (VerboseLevel)atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-h") == 0) { print_help(); }
+	}
+
 	vector<cl::Platform> platforms;
 
 	try
@@ -136,12 +171,15 @@ int main()
 
 		for (unsigned int i = 0; i < platforms.size(); i++)
 		{
-			string platform_name;
-			platforms[i].getInfo((cl_platform_info)CL_PLATFORM_NAME, &platform_name);
-			string platform_vendor;
-			platforms[i].getInfo((cl_platform_info)CL_PLATFORM_VENDOR, &platform_vendor);
+			cout << "\n " << (i + 1) << ") " << platforms[i].getInfo<CL_PLATFORM_NAME>() << ", version: " << platforms[i].getInfo<CL_PLATFORM_VERSION>();
 
-			cout << " " << (i + 1) << ") " << platform_name << " [" << platform_vendor << "]" << endl;
+			if (verbose_level > VERBOSE_BRIEF)
+				cout << ", vendor: " << platforms[i].getInfo<CL_PLATFORM_VENDOR>();
+
+			if (verbose_level > VERBOSE_DETAILED)
+				cout << ", profile: " << platforms[i].getInfo<CL_PLATFORM_PROFILE>() << ", extensions: " << platforms[i].getInfo<CL_PLATFORM_EXTENSIONS>();
+
+			cout << endl;
 
 			vector<cl::Device> devices;
 
@@ -151,13 +189,29 @@ int main()
 
 			for (unsigned int j = 0; j < devices.size(); j++)
 			{
-				string device_name;
-				devices[j].getInfo((cl_device_info)CL_DEVICE_NAME, &device_name);
+				cout << "\t " << (j + 1) << ") " << devices[j].getInfo<CL_DEVICE_NAME>() << ", version: " << devices[j].getInfo<CL_DEVICE_VERSION>();
 
-				cl_device_type device_type;
-				devices[j].getInfo((cl_device_info)CL_DEVICE_TYPE, &device_type);
+				if (verbose_level > VERBOSE_BRIEF)
+				{
+					cout << ", vendor: " << devices[j].getInfo<CL_DEVICE_VENDOR>();
+					cl_device_type device_type = devices[j].getInfo<CL_DEVICE_TYPE>();
+					cout << ", type: ";
+					if (device_type & CL_DEVICE_TYPE_DEFAULT)
+						cerr << "DEFAULT ";
+					if (device_type & CL_DEVICE_TYPE_CPU)
+						cerr << "CPU ";
+					if (device_type & CL_DEVICE_TYPE_GPU)
+						cerr << "GPU ";
+					if (device_type & CL_DEVICE_TYPE_ACCELERATOR)
+						cerr << "ACCELERATOR ";
+					cout << ", compute units: " << devices[j].getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
+				}
 
-				cout << "\t " << (j + 1) << ") " << device_name << endl;
+				if (verbose_level > VERBOSE_DETAILED)
+				{
+				}
+
+				cout << endl;
 			}
 		}
 	}
@@ -165,30 +219,80 @@ int main()
 		cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
 	}
 
-	/*
-	const cl_context_properties contextProperties[] =
+
+	//select device
+	cl::Device device;
+
+	try
 	{
-		CL_CONTEXT_PLATFORM,
-		reinterpret_cast<cl_context_properties> (platformIds[platform]),
-		0, 0
-	};
+		for (unsigned int i = 0; i < platforms.size(); i++)
+		{
+			vector<cl::Device> devices;
+			platforms[i].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
 
-	clGetDeviceIDs(platformIds[platform], CL_DEVICE_TYPE_ALL, 0, nullptr, &deviceIdCount);
-	std::vector<cl_device_id> deviceIds(deviceIdCount);
-	clGetDeviceIDs(platformIds[platform], CL_DEVICE_TYPE_ALL, deviceIdCount, deviceIds.data(), nullptr);
+			for (unsigned int j = 0; j < devices.size(); j++)
+			{
+				if ((i == platform_id) && (j == device_id))
+					device = devices[j];
+				break;
+			}
+		}
+	}
+	catch (cl::Error err) {
+		cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
+	}
 
-	cl_context context = clCreateContext(contextProperties, deviceIdCount, deviceIds.data(), nullptr,
-		nullptr, &error);
+	cl::Context context({ device });
 
-	CheckError(error);
+	cl::Program::Sources sources;
 
-	cl_command_queue queue = clCreateCommandQueue(context, deviceIds[device], 0, &error);
+	// kernel calculates for each element C=A+B
+	std::string kernel_code =
+		"   void kernel simple_add(global const int* A, global const int* B, global int* C){       "
+		"       int id = get_global_id(0);"
+		"       C[id] = A[id] + B[id];                 "
+		"   }                                                                               ";
+	sources.push_back({ kernel_code.c_str(), kernel_code.length() });
 
-	CheckError(error);
+	cl::Program program(context, sources);
 
-	clReleaseCommandQueue(queue);
-	clReleaseContext(context);
+	try
+	{
+		program.build({ device });
+	}
+	catch (cl::Error err) {
+		cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
+	}
 
-	*/
+	// create buffers on the device
+	cl::Buffer buffer_A(context, CL_MEM_READ_WRITE, sizeof(int) * 10);
+	cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, sizeof(int) * 10);
+	cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, sizeof(int) * 10);
+
+	int A[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int B[] = { 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 };
+	int C[10];
+
+	//create queue to which we will push commands for the device.
+	cl::CommandQueue queue(context, device);
+
+	//write arrays A and B to the device
+	queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(int) * 10, A);
+	queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 10, B);
+	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int) * 10, C);
+
+	cl::Kernel kernel_add = cl::Kernel(program, "simple_add");
+	kernel_add.setArg(0, buffer_A);
+	kernel_add.setArg(1, buffer_B);
+	kernel_add.setArg(2, buffer_C);
+
+	queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(10), cl::NullRange);
+	queue.finish();
+
+	std::cout << " result: \n";
+	for (int i = 0; i<10; i++){
+		std::cout << C[i] << " ";
+	}
+
 	return 0;
 }
