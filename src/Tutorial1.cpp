@@ -143,12 +143,6 @@ void print_help()
 
 int main(int argc, char **argv)
 {
-	if (argc == 1)
-	{
-		print_help();
-		exit(0);
-	}
-
 	VerboseLevel verbose_level = VERBOSE_OFF;
 	int platform_id = 0;
 	int device_id = 0;
@@ -163,6 +157,8 @@ int main(int argc, char **argv)
 
 	vector<cl::Platform> platforms;
 
+	if (verbose_level != VERBOSE_OFF)
+	{
 	try
 	{
 		cl::Platform::get(&platforms);
@@ -218,6 +214,7 @@ int main(int argc, char **argv)
 	catch (cl::Error err) {
 		cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
 	}
+	}
 
 
 	//select device
@@ -225,6 +222,8 @@ int main(int argc, char **argv)
 
 	try
 	{
+		cl::Platform::get(&platforms);
+
 		for (unsigned int i = 0; i < platforms.size(); i++)
 		{
 			vector<cl::Device> devices;
@@ -264,30 +263,32 @@ int main(int argc, char **argv)
 		cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
 	}
 
-	// create buffers on the device
-	cl::Buffer buffer_A(context, CL_MEM_READ_WRITE, sizeof(int) * 10);
-	cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, sizeof(int) * 10);
-	cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, sizeof(int) * 10);
-
+	//host buffers
 	int A[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	int B[] = { 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 };
-	int C[10];
+	int C[sizeof(A)/sizeof(A[0])];
+
+	// create buffers on the device
+	cl::Buffer buffer_A(context, CL_MEM_READ_WRITE, sizeof(A));
+	cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, sizeof(B));
+	cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, sizeof(C));
 
 	//create queue to which we will push commands for the device.
 	cl::CommandQueue queue(context, device);
 
 	//write arrays A and B to the device
-	queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(int) * 10, A);
-	queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 10, B);
-	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int) * 10, C);
+	queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(A), A);
+	queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(B), B);
 
 	cl::Kernel kernel_add = cl::Kernel(program, "simple_add");
 	kernel_add.setArg(0, buffer_A);
 	kernel_add.setArg(1, buffer_B);
 	kernel_add.setArg(2, buffer_C);
 
-	queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(10), cl::NullRange);
+	queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(sizeof(A) / sizeof(A[0])), cl::NullRange);
 	queue.finish();
+
+	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(C), C);
 
 	std::cout << " result: \n";
 	for (int i = 0; i<10; i++){
