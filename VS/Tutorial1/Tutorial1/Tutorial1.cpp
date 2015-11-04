@@ -3,14 +3,9 @@
 #include <vector>
 #include <string>
 
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 #define __CL_ENABLE_EXCEPTIONS
 
-#if defined(__APPLE__) || defined(__MACOSX)
-#include <OpenCL/cl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
+#include "CL\cl.hpp"
 
 std::string GetPlatformName(cl_platform_id id)
 {
@@ -141,6 +136,12 @@ void print_help()
 	cerr << "  -h : print this message" << endl;
 }
 
+//std::string source_code;
+
+void AddSources(cl::Program::Sources& sources, const std::string& file_name) {
+	std::string* source_code = new std::string(std::istreambuf_iterator<char>(std::ifstream(file_name)), (std::istreambuf_iterator<char>()));
+	sources.push_back(std::make_pair((*source_code).c_str(), source_code->length() + 1));
+}
 
 int main(int argc, char **argv)
 {
@@ -160,61 +161,61 @@ int main(int argc, char **argv)
 
 	if (verbose_level != VERBOSE_OFF)
 	{
-	try
-	{
-		cl::Platform::get(&platforms);
-
-		cout << "Found " << platforms.size() << " platform(s):" << endl;
-
-		for (unsigned int i = 0; i < platforms.size(); i++)
+		try
 		{
-			cout << "\n " << (i + 1) << ") " << platforms[i].getInfo<CL_PLATFORM_NAME>() << ", version: " << platforms[i].getInfo<CL_PLATFORM_VERSION>();
+			cl::Platform::get(&platforms);
 
-			if (verbose_level > VERBOSE_BRIEF)
-				cout << ", vendor: " << platforms[i].getInfo<CL_PLATFORM_VENDOR>();
+			cout << "Found " << platforms.size() << " platform(s):" << endl;
 
-			if (verbose_level > VERBOSE_DETAILED)
-				cout << ", profile: " << platforms[i].getInfo<CL_PLATFORM_PROFILE>() << ", extensions: " << platforms[i].getInfo<CL_PLATFORM_EXTENSIONS>();
-
-			cout << endl;
-
-			vector<cl::Device> devices;
-
-			platforms[i].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
-
-			cout << "\tFound " << devices.size() << " device(s):" << endl;
-
-			for (unsigned int j = 0; j < devices.size(); j++)
+			for (unsigned int i = 0; i < platforms.size(); i++)
 			{
-				cout << "\t " << (j + 1) << ") " << devices[j].getInfo<CL_DEVICE_NAME>() << ", version: " << devices[j].getInfo<CL_DEVICE_VERSION>();
+				cout << "\n " << (i + 1) << ") " << platforms[i].getInfo<CL_PLATFORM_NAME>() << ", version: " << platforms[i].getInfo<CL_PLATFORM_VERSION>();
 
 				if (verbose_level > VERBOSE_BRIEF)
-				{
-					cout << ", vendor: " << devices[j].getInfo<CL_DEVICE_VENDOR>();
-					cl_device_type device_type = devices[j].getInfo<CL_DEVICE_TYPE>();
-					cout << ", type: ";
-					if (device_type & CL_DEVICE_TYPE_DEFAULT)
-						cerr << "DEFAULT ";
-					if (device_type & CL_DEVICE_TYPE_CPU)
-						cerr << "CPU ";
-					if (device_type & CL_DEVICE_TYPE_GPU)
-						cerr << "GPU ";
-					if (device_type & CL_DEVICE_TYPE_ACCELERATOR)
-						cerr << "ACCELERATOR ";
-					cout << ", compute units: " << devices[j].getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
-				}
+					cout << ", vendor: " << platforms[i].getInfo<CL_PLATFORM_VENDOR>();
 
 				if (verbose_level > VERBOSE_DETAILED)
-				{
-				}
+					cout << ", profile: " << platforms[i].getInfo<CL_PLATFORM_PROFILE>() << ", extensions: " << platforms[i].getInfo<CL_PLATFORM_EXTENSIONS>();
 
 				cout << endl;
+
+				vector<cl::Device> devices;
+
+				platforms[i].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
+
+				cout << "\tFound " << devices.size() << " device(s):" << endl;
+
+				for (unsigned int j = 0; j < devices.size(); j++)
+				{
+					cout << "\t " << (j + 1) << ") " << devices[j].getInfo<CL_DEVICE_NAME>() << ", version: " << devices[j].getInfo<CL_DEVICE_VERSION>();
+
+					if (verbose_level > VERBOSE_BRIEF)
+					{
+						cout << ", vendor: " << devices[j].getInfo<CL_DEVICE_VENDOR>();
+						cl_device_type device_type = devices[j].getInfo<CL_DEVICE_TYPE>();
+						cout << ", type: ";
+						if (device_type & CL_DEVICE_TYPE_DEFAULT)
+							cerr << "DEFAULT ";
+						if (device_type & CL_DEVICE_TYPE_CPU)
+							cerr << "CPU ";
+						if (device_type & CL_DEVICE_TYPE_GPU)
+							cerr << "GPU ";
+						if (device_type & CL_DEVICE_TYPE_ACCELERATOR)
+							cerr << "ACCELERATOR ";
+						cout << ", compute units: " << devices[j].getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
+					}
+
+					if (verbose_level > VERBOSE_DETAILED)
+					{
+					}
+
+					cout << endl;
+				}
 			}
 		}
-	}
-	catch (cl::Error err) {
-		cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
-	}
+		catch (cl::Error err) {
+			cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
+		}
 	}
 
 
@@ -246,22 +247,9 @@ int main(int argc, char **argv)
 
 	cl::Program::Sources sources;
 
-	// kernel calculates for each element C=A+B
-	std::string kernel_code =
-		"   void kernel simple_add(global const int* A, global const int* B, global int* C){       "
-		"       int id = get_global_id(0);"
-		"       C[id] = A[id] + B[id];                 "
-		"   }                                                                               ";
-	sources.push_back({ kernel_code.c_str(), kernel_code.length() });
+	AddSources(sources, "kernels/simple_add.cl");
 
-	//kernel from file
-	std::ifstream sourceFile("simple_add.cl");
-	std::string sourceCode(
-		std::istreambuf_iterator<char>(sourceFile),
-		(std::istreambuf_iterator<char>()));
-	cl::Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length() + 1));
-
-	cl::Program program(context, source);
+	cl::Program program(context, sources);
 
 	try
 	{
@@ -274,7 +262,7 @@ int main(int argc, char **argv)
 	//host buffers
 	int A[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	int B[] = { 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 };
-	int C[sizeof(A)/sizeof(A[0])];
+	int C[sizeof(A) / sizeof(A[0])];
 
 	// create buffers on the device
 	cl::Buffer buffer_A(context, CL_MEM_READ_WRITE, sizeof(A));
