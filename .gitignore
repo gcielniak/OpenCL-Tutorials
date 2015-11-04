@@ -17,3 +17,4 @@ bld/
 *.sdf
 *.suo
 *.filters
+*.user
