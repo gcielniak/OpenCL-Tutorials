@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <string>
 
 #define __CL_ENABLE_EXCEPTIONS
@@ -17,7 +18,6 @@ void print_help()
 
 int main(int argc, char **argv)
 {
-	VerboseLevel verbose_level = VERBOSE_OFF;
 	int platform_id = -1;
 	int device_id = -1;
 
@@ -25,42 +25,11 @@ int main(int argc, char **argv)
 	{
 		if ((strcmp(argv[i], "-p") == 0) && (i < (argc - 1))) { platform_id = atoi(argv[++i]); }
 		else if ((strcmp(argv[i], "-d") == 0) && (i < (argc - 1))) { device_id = atoi(argv[++i]); }
-		else if ((strcmp(argv[i], "-v") == 0) && (i < (argc - 1))) { verbose_level = (VerboseLevel)atoi(argv[++i]); }
+		else if ((strcmp(argv[i], "-v") == 0) && (i < (argc - 1))) { ListPlatformsDevices((VerboseLevel)atoi(argv[++i])); }
 		else if (strcmp(argv[i], "-h") == 0) { print_help(); }
 	}
 
-	ListPlatformsDevices(verbose_level);
-
-	vector<cl::Platform> platforms;
-
-	//select device
-	cl::Device device;
-
-	cl::Context context(CL_DEVICE_TYPE_GPU);
-
-	try
-	{
-		cl::Platform::get(&platforms);
-
-		for (unsigned int i = 0; i < platforms.size(); i++)
-		{
-			vector<cl::Device> devices;
-			platforms[i].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
-
-			for (unsigned int j = 0; j < devices.size(); j++)
-			{
-				if ((i == platform_id) && (j == device_id)) {
-					device = devices[j];
-					context = cl::Context({ device });
-				}
-				break;
-			}
-		}
-	}
-	catch (cl::Error err) {
-		cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
-	}
-
+	cl::Context context = GetContext(platform_id, device_id);
 
 	cl::Program::Sources sources;
 
@@ -74,39 +43,50 @@ int main(int argc, char **argv)
 	}
 	catch (cl::Error err) {
 		cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << endl;
+		return 0;
 	}
 
 	//host buffers
-	int A[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	int B[] = { 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 };
-	int C[sizeof(A) / sizeof(A[0])];
+	//input
+	std::vector<int> A = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }; //C++11 allows this type of initialisation
+	std::vector<int> B = { 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 };
+	
+	//output
+	std::vector<int> C(A.size());
 
 	// create buffers on the device
-	cl::Buffer buffer_A(context, CL_MEM_READ_WRITE, sizeof(A));
-	cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, sizeof(B));
-	cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, sizeof(C));
+	cl::Buffer buffer_A(context, CL_MEM_READ_WRITE, A.size()*sizeof(int));
+	cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, B.size()*sizeof(int));
+	cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, C.size()*sizeof(int));
 
 	//create queue to which we will push commands for the device.
-	cl::CommandQueue queue(context);
+	cl::CommandQueue queue(context, CL_QUEUE_PROFILING_ENABLE);
 
 	//write arrays A and B to the device
-	queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(A), A);
-	queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(B), B);
+	queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, A.size()*sizeof(int), &A[0]);
+	queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, B.size()*sizeof(int), &B[0]);
+
+	cl::Event evt;
 
 	cl::Kernel kernel_add = cl::Kernel(program, "simple_add");
 	kernel_add.setArg(0, buffer_A);
 	kernel_add.setArg(1, buffer_B);
 	kernel_add.setArg(2, buffer_C);
-	queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(sizeof(A) / sizeof(A[0])), cl::NullRange);
+	queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(A.size()), cl::NullRange, NULL, &evt);
 
 	queue.finish();
 
-	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(C), C);
+	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, C.size()*sizeof(int), &C[0]);
+
+	evt.wait();
 
 	std::cout << " result: \n";
-	for (int i = 0; i<10; i++){
+	for (int i = 0; i < C.size(); i++){
 		std::cout << C[i] << " ";
 	}
+	cout << endl;
+
+	cerr << "Time elapsed: " << evt.getProfilingInfo<CL_PROFILING_COMMAND_END>() - evt.getProfilingInfo<CL_PROFILING_COMMAND_START>() << " ns" << endl;
 
 	return 0;
 }

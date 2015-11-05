@@ -193,3 +193,23 @@ void ListPlatformsDevices(VerboseLevel verbose_level) {
 		}
 	}
 }
+
+cl::Context GetContext(int platform_id, int device_id) {
+	std::vector<cl::Platform> platforms;
+
+	cl::Platform::get(&platforms);
+
+	for (unsigned int i = 0; i < platforms.size(); i++)
+	{
+		std::vector<cl::Device> devices;
+		platforms[i].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
+
+		for (unsigned int j = 0; j < devices.size(); j++)
+		{
+			if ((i == platform_id) && (j == device_id))
+				return cl::Context({ devices[j] });
+		}
+	}
+
+	return cl::Context();
+}
