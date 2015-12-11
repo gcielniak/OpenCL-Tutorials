@@ -18,11 +18,10 @@ void print_help()
 
 int main(int argc, char **argv)
 {
-	int platform_id = -1;
-	int device_id = -1;
+	int platform_id = 0;
+	int device_id = 0;
 
-	for (int i = 1; i < argc; i++)
-	{
+	for (int i = 1; i < argc; i++)	{
 		if ((strcmp(argv[i], "-p") == 0) && (i < (argc - 1))) { platform_id = atoi(argv[++i]); }
 		else if ((strcmp(argv[i], "-d") == 0) && (i < (argc - 1))) { device_id = atoi(argv[++i]); }
 		else if ((strcmp(argv[i], "-v") == 0) && (i < (argc - 1))) { ListPlatformsDevices((VerboseLevel)atoi(argv[++i])); }
@@ -37,8 +36,7 @@ int main(int argc, char **argv)
 
 	cl::Program program(context, sources);
 
-	try
-	{
+	try	{
 		program.build();
 	}
 	catch (cl::Error err) {
@@ -76,12 +74,12 @@ int main(int argc, char **argv)
 
 	queue.finish();
 
-	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, C.size()*sizeof(int), &C[0]);
-
 	evt.wait();
 
+	queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, C.size()*sizeof(int), &C[0]);
+
 	std::cout << " result: \n";
-	for (int i = 0; i < C.size(); i++){
+	for (unsigned int i = 0; i < C.size(); i++){
 		std::cout << C[i] << " ";
 	}
 	cout << endl;

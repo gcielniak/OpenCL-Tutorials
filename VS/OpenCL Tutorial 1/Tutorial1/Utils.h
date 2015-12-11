@@ -127,6 +127,7 @@ enum VerboseLevel
 };
 
 void AddSources(cl::Program::Sources& sources, const std::string& file_name) {
+	//TODO: add file existence check
 	std::string* source_code = new std::string(std::istreambuf_iterator<char>(std::ifstream(file_name)), (std::istreambuf_iterator<char>()));
 	sources.push_back(std::make_pair((*source_code).c_str(), source_code->length() + 1));
 }
