@@ -137,6 +137,7 @@ void ListPlatformsDevices(VerboseLevel verbose_level) {
 
 	if (verbose_level != VERBOSE_OFF)
 	{
+		std::cout << "----------------------------------------------------------------" << std::endl;
 		try
 		{
 			cl::Platform::get(&platforms);
@@ -145,7 +146,7 @@ void ListPlatformsDevices(VerboseLevel verbose_level) {
 
 			for (unsigned int i = 0; i < platforms.size(); i++)
 			{
-				std::cout << "\n " << (i + 1) << ") " << platforms[i].getInfo<CL_PLATFORM_NAME>() << ", version: " << platforms[i].getInfo<CL_PLATFORM_VERSION>();
+				std::cout << "\nPlatform " << i << ", " << platforms[i].getInfo<CL_PLATFORM_NAME>() << ", version: " << platforms[i].getInfo<CL_PLATFORM_VERSION>();
 
 				if (verbose_level > VERBOSE_BRIEF)
 					std::cout << ", vendor: " << platforms[i].getInfo<CL_PLATFORM_VENDOR>();
@@ -159,11 +160,11 @@ void ListPlatformsDevices(VerboseLevel verbose_level) {
 
 				platforms[i].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
 
-				std::cout << "\tFound " << devices.size() << " device(s):" << std::endl;
+				std::cout << "\n   Found " << devices.size() << " device(s):" << std::endl;
 
 				for (unsigned int j = 0; j < devices.size(); j++)
 				{
-					std::cout << "\t " << (j + 1) << ") " << devices[j].getInfo<CL_DEVICE_NAME>() << ", version: " << devices[j].getInfo<CL_DEVICE_VERSION>();
+					std::cout << "\n      Device " << j << ", " << devices[j].getInfo<CL_DEVICE_NAME>() << ", version: " << devices[j].getInfo<CL_DEVICE_VERSION>();
 
 					if (verbose_level > VERBOSE_BRIEF)
 					{
@@ -188,6 +189,7 @@ void ListPlatformsDevices(VerboseLevel verbose_level) {
 					std::cout << std::endl;
 				}
 			}
+			std::cout << "----------------------------------------------------------------" << std::endl;
 		}
 		catch (cl::Error err) {
 			std::cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << std::endl;

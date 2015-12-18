@@ -74,6 +74,7 @@
     <ClCompile Include="Tutorial1.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Addons.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
