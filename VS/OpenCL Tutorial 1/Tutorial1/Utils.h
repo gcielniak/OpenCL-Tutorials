@@ -3,34 +3,25 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 #define __CL_ENABLE_EXCEPTIONS
 #include "CL\cl.hpp"
 
-std::string GetPlatformName(cl_platform_id id)
+std::string GetPlatformName(int platform_id)
 {
-	size_t size = 0;
-	clGetPlatformInfo(id, CL_PLATFORM_NAME, 0, nullptr, &size);
-
-	std::string result;
-	result.resize(size);
-	clGetPlatformInfo(id, CL_PLATFORM_NAME, size,
-		const_cast<char*> (result.data()), nullptr);
-
-	return result;
+	std::vector<cl::Platform> platforms;
+	cl::Platform::get(&platforms);
+	return platforms[platform_id].getInfo<CL_PLATFORM_NAME>();
 }
 
-std::string GetDeviceName(cl_device_id id)
+std::string GetDeviceName(int platform_id, int device_id)
 {
-	size_t size = 0;
-	clGetDeviceInfo(id, CL_DEVICE_NAME, 0, nullptr, &size);
-
-	std::string result;
-	result.resize(size);
-	clGetDeviceInfo(id, CL_DEVICE_NAME, size,
-		const_cast<char*> (result.data()), nullptr);
-
-	return result;
+	std::vector<cl::Platform> platforms;
+	cl::Platform::get(&platforms);
+	std::vector<cl::Device> devices;
+	platforms[platform_id].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
+	return devices[device_id].getInfo<CL_DEVICE_NAME>();
 }
 
 const char *getErrorString(cl_int error)
@@ -215,4 +206,30 @@ cl::Context GetContext(int platform_id, int device_id) {
 	}
 
 	return cl::Context();
+}
+
+enum ProfilingResolution {
+	PROF_NS = 1,
+	PROF_US = 1000,
+	PROF_MS = 1000000,
+	PROF_S = 1000000000
+};
+
+std::string GetFullProfilingInfo(const cl::Event& evnt, ProfilingResolution resolution) {
+	std::stringstream sstream;
+
+	sstream << "Queued " << (evnt.getProfilingInfo<CL_PROFILING_COMMAND_SUBMIT>() - evnt.getProfilingInfo<CL_PROFILING_COMMAND_QUEUED>()) / resolution;
+	sstream << ", Submitted " << (evnt.getProfilingInfo<CL_PROFILING_COMMAND_START>() - evnt.getProfilingInfo<CL_PROFILING_COMMAND_SUBMIT>()) / resolution;
+	sstream << ", Executed " << (evnt.getProfilingInfo<CL_PROFILING_COMMAND_END>() - evnt.getProfilingInfo<CL_PROFILING_COMMAND_START>()) / resolution;
+	sstream << ", Total " << (evnt.getProfilingInfo<CL_PROFILING_COMMAND_END>() - evnt.getProfilingInfo<CL_PROFILING_COMMAND_QUEUED>()) / resolution;
+
+	switch (resolution) {
+	case PROF_NS: sstream << " [ns]"; break;
+	case PROF_US: sstream << " [us]"; break;
+	case PROF_MS: sstream << " [ms]"; break;
+	case PROF_S: sstream << " [s]"; break;
+	default: break;
+	}
+
+	return sstream.str();
 }
