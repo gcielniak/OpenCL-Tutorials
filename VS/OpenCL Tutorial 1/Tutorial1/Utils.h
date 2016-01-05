@@ -109,83 +109,59 @@ void CheckError(cl_int error)
 	}
 }
 
-enum VerboseLevel
-{
-	VERBOSE_OFF,
-	VERBOSE_BRIEF,
-	VERBOSE_DETAILED,
-	VERBOSE_FULL
-};
-
 void AddSources(cl::Program::Sources& sources, const std::string& file_name) {
 	//TODO: add file existence check
 	std::string* source_code = new std::string(std::istreambuf_iterator<char>(std::ifstream(file_name)), (std::istreambuf_iterator<char>()));
 	sources.push_back(std::make_pair((*source_code).c_str(), source_code->length() + 1));
 }
 
-void ListPlatformsDevices(VerboseLevel verbose_level) {
+std::string ListPlatformsDevices() {
+
+	std::stringstream sstream;
 	std::vector<cl::Platform> platforms;
 
-	if (verbose_level != VERBOSE_OFF)
+	cl::Platform::get(&platforms);
+
+	sstream << "Found " << platforms.size() << " platform(s):" << std::endl;
+
+	for (unsigned int i = 0; i < platforms.size(); i++)
 	{
-		std::cout << "----------------------------------------------------------------" << std::endl;
-		try
+		sstream << "\nPlatform " << i << ", " << platforms[i].getInfo<CL_PLATFORM_NAME>() << ", version: " << platforms[i].getInfo<CL_PLATFORM_VERSION>();
+
+		sstream << ", vendor: " << platforms[i].getInfo<CL_PLATFORM_VENDOR>() << std::endl;
+
+		std::vector<cl::Device> devices;
+
+		platforms[i].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
+
+		sstream << "\n   Found " << devices.size() << " device(s):" << std::endl;
+
+		for (unsigned int j = 0; j < devices.size(); j++)
 		{
-			cl::Platform::get(&platforms);
+			sstream << "\n      Device " << j << ", " << devices[j].getInfo<CL_DEVICE_NAME>() << ", version: " << devices[j].getInfo<CL_DEVICE_VERSION>();
 
-			std::cout << "Found " << platforms.size() << " platform(s):" << std::endl;
+			sstream << ", vendor: " << devices[j].getInfo<CL_DEVICE_VENDOR>();
+			cl_device_type device_type = devices[j].getInfo<CL_DEVICE_TYPE>();
+			sstream << ", type: ";
+			if (device_type & CL_DEVICE_TYPE_DEFAULT)
+				sstream << "DEFAULT ";
+			if (device_type & CL_DEVICE_TYPE_CPU)
+				sstream << "CPU ";
+			if (device_type & CL_DEVICE_TYPE_GPU)
+				sstream << "GPU ";
+			if (device_type & CL_DEVICE_TYPE_ACCELERATOR)
+				sstream << "ACCELERATOR ";
+			sstream << ", compute units: " << devices[j].getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
+			sstream << ", clock freq [MHz]: " << devices[j].getInfo<CL_DEVICE_MAX_CLOCK_FREQUENCY>();
+			sstream << ", max memory size [B]: " << devices[j].getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+			sstream << ", max allocatable memory [B]: " << devices[j].getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
 
-			for (unsigned int i = 0; i < platforms.size(); i++)
-			{
-				std::cout << "\nPlatform " << i << ", " << platforms[i].getInfo<CL_PLATFORM_NAME>() << ", version: " << platforms[i].getInfo<CL_PLATFORM_VERSION>();
-
-				if (verbose_level > VERBOSE_BRIEF)
-					std::cout << ", vendor: " << platforms[i].getInfo<CL_PLATFORM_VENDOR>();
-
-				if (verbose_level > VERBOSE_DETAILED)
-					std::cout << ", profile: " << platforms[i].getInfo<CL_PLATFORM_PROFILE>() << ", extensions: " << platforms[i].getInfo<CL_PLATFORM_EXTENSIONS>();
-
-				std::cout << std::endl;
-
-				std::vector<cl::Device> devices;
-
-				platforms[i].getDevices((cl_device_type)CL_DEVICE_TYPE_ALL, &devices);
-
-				std::cout << "\n   Found " << devices.size() << " device(s):" << std::endl;
-
-				for (unsigned int j = 0; j < devices.size(); j++)
-				{
-					std::cout << "\n      Device " << j << ", " << devices[j].getInfo<CL_DEVICE_NAME>() << ", version: " << devices[j].getInfo<CL_DEVICE_VERSION>();
-
-					if (verbose_level > VERBOSE_BRIEF)
-					{
-						std::cout << ", vendor: " << devices[j].getInfo<CL_DEVICE_VENDOR>();
-						cl_device_type device_type = devices[j].getInfo<CL_DEVICE_TYPE>();
-						std::cout << ", type: ";
-						if (device_type & CL_DEVICE_TYPE_DEFAULT)
-							std::cout << "DEFAULT ";
-						if (device_type & CL_DEVICE_TYPE_CPU)
-							std::cout << "CPU ";
-						if (device_type & CL_DEVICE_TYPE_GPU)
-							std::cout << "GPU ";
-						if (device_type & CL_DEVICE_TYPE_ACCELERATOR)
-							std::cout << "ACCELERATOR ";
-						std::cout << ", compute units: " << devices[j].getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
-					}
-
-					if (verbose_level > VERBOSE_DETAILED)
-					{
-					}
-
-					std::cout << std::endl;
-				}
-			}
-			std::cout << "----------------------------------------------------------------" << std::endl;
-		}
-		catch (cl::Error err) {
-			std::cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << std::endl;
+			sstream << std::endl;
 		}
 	}
+	sstream << "----------------------------------------------------------------" << std::endl;
+
+	return sstream.str();
 }
 
 cl::Context GetContext(int platform_id, int device_id) {
