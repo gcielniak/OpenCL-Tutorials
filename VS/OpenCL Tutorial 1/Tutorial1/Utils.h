@@ -129,6 +129,7 @@ std::string ListPlatformsDevices() {
 		sstream << "\nPlatform " << i << ", " << platforms[i].getInfo<CL_PLATFORM_NAME>() << ", version: " << platforms[i].getInfo<CL_PLATFORM_VERSION>();
 
 		sstream << ", vendor: " << platforms[i].getInfo<CL_PLATFORM_VENDOR>() << std::endl;
+		sstream << ", extensions: " << platforms[i].getInfo<CL_PLATFORM_EXTENSIONS>() << std::endl;
 
 		std::vector<cl::Device> devices;
 

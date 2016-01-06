@@ -53,8 +53,12 @@
       <AdditionalDependencies>OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>%systemroot%\System32\xcopy "$(ProjectDir)kernels" "$(TargetDir)kernels" /E /Y /I</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>%systemroot%\System32\xcopy "$(ProjectDir)kernels" "$(TargetDir)kernels" /E /Y /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
