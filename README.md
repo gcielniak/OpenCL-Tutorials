@@ -1,2 +1,0 @@
-# OpenCL-Tutorials
-OpenCL Tutorials
