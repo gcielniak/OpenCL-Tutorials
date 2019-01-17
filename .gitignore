@@ -12,6 +12,7 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+.vs
 
 *.opensdf
 *.sdf
