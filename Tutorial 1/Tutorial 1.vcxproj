@@ -185,5 +185,8 @@
   <ItemGroup>
     <ClCompile Include="Tutorial 1.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="my_kernels_1.cl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

@@ -1,5 +1,5 @@
 ﻿//fixed 4 step reduce
-__kernel void reduce_add_1(__global const int* A, __global int* B) {
+kernel void reduce_add_1(global const int* A, global int* B) {
 	int id = get_global_id(0);
 	int N = get_global_size(0);
 
@@ -30,7 +30,7 @@ __kernel void reduce_add_1(__global const int* A, __global int* B) {
 }
 
 //flexible step reduce 
-__kernel void reduce_add_2(__global const int* A, __global int* B) {
+kernel void reduce_add_2(global const int* A, global int* B) {
 	int id = get_global_id(0);
 	int N = get_global_size(0);
 
@@ -47,7 +47,7 @@ __kernel void reduce_add_2(__global const int* A, __global int* B) {
 }
 
 //reduce using local memory (so called privatisation)
-__kernel void reduce_add_3(__global const int* A, __global int* B, __local int* scratch) {
+kernel void reduce_add_3(global const int* A, global int* B, local int* scratch) {
 	int id = get_global_id(0);
 	int lid = get_local_id(0);
 	int N = get_local_size(0);
@@ -70,7 +70,7 @@ __kernel void reduce_add_3(__global const int* A, __global int* B, __local int* 
 
 //reduce using local memory + accumulation of local sums into a single location
 //works with any number of groups - not optimal!
-__kernel void reduce_add_4(__global const int* A, __global int* B, __local int* scratch) {
+kernel void reduce_add_4(global const int* A, global int* B, local int* scratch) {
 	int id = get_global_id(0);
 	int lid = get_local_id(0);
 	int N = get_local_size(0);
@@ -96,7 +96,7 @@ __kernel void reduce_add_4(__global const int* A, __global int* B, __local int* 
 }
 
 //a very simple histogram implementation
-__kernel void hist_simple(__global const int* A, __global int* H) { 
+kernel void hist_simple(global const int* A, global int* H) { 
 	int id = get_global_id(0);
 
 	//assumes that H has been initialised to 0
@@ -107,11 +107,11 @@ __kernel void hist_simple(__global const int* A, __global int* H) {
 
 //a double-buffered version of the Hillis-Steele inclusive scan
 //requires two additional input arguments which correspond to two local buffers
-__kernel void scan_add(__global const int* A, __global int* B, __local int* scratch_1, __local int* scratch_2) {
+kernel void scan_add(__global const int* A, global int* B, local int* scratch_1, local int* scratch_2) {
 	int id = get_global_id(0);
 	int lid = get_local_id(0);
 	int N = get_local_size(0);
-	__local int *scratch_3;//used for buffer swap
+	local int *scratch_3;//used for buffer swap
 
 	//cache all N values from global memory to local memory
 	scratch_1[lid] = A[id];
@@ -137,13 +137,13 @@ __kernel void scan_add(__global const int* A, __global int* B, __local int* scra
 }
 
 //calculates the block sums
-__kernel void block_sum(__global const int* A, __global int* B, int local_size) {
+kernel void block_sum(global const int* A, global int* B, int local_size) {
 	int id = get_global_id(0);
 	B[id] = A[(id+1)*local_size-1];
 }
 
 //simple exclusive serial scan based on atomic operations - sufficient for small number of elements
-__kernel void scan_add_atomic(__global int* A, __global int* B) {
+kernel void scan_add_atomic(global int* A, global int* B) {
 	int id = get_global_id(0);
 	int N = get_global_size(0);
 	for (int i = id+1; i < N; i++)
@@ -151,7 +151,7 @@ __kernel void scan_add_atomic(__global int* A, __global int* B) {
 }
 
 //adjust the values stored in partial scans by adding block sums to corresponding blocks
-__kernel void scan_add_adjust(__global int* A, __global const int* B) {
+kernel void scan_add_adjust(global int* A, global const int* B) {
 	int id = get_global_id(0);
 	int gid = get_group_id(0);
 	A[id] += B[gid];

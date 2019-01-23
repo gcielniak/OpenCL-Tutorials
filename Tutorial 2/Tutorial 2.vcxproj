@@ -189,5 +189,8 @@
     <ClCompile Include="Graphics\lodepng\lodepng.cpp" />
     <ClCompile Include="Tutorial 2.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="my_kernels_2.cl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

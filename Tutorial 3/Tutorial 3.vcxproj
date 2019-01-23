@@ -180,7 +180,6 @@
     <ClInclude Include="..\Tutorial 2\Exception.h" />
     <ClInclude Include="..\Tutorial 2\Graphics\lodepng\lodepng.h" />
     <ClInclude Include="..\Tutorial 2\ImageIO.h" />
-    <ClInclude Include="..\Tutorial 2\Utils.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,11 +1,11 @@
 //a simple OpenCL kernel which copies all pixels from A to B
-__kernel void identity(__global const uchar4* A, __global uchar4* B) {
+kernel void identity(global const uchar4* A, global uchar4* B) {
 	int id = get_global_id(0);
 	B[id] = A[id];
 }
 
 //simple 2D identity kernel
-__kernel void identity2D(__global const uchar4* A, __global uchar4* B) {
+kernel void identity2D(global const uchar4* A, global uchar4* B) {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
 	int width = get_global_size(0); //width in pixels
@@ -14,7 +14,7 @@ __kernel void identity2D(__global const uchar4* A, __global uchar4* B) {
 }
 
 //2D averaging filter
-__kernel void avg_filter2D(__global const uchar4* A, __global uchar4* B) {
+kernel void avg_filter2D(global const uchar4* A, global uchar4* B) {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
 	int width = get_global_size(0); //width in pixels
@@ -32,7 +32,7 @@ __kernel void avg_filter2D(__global const uchar4* A, __global uchar4* B) {
 }
 
 //2D 3x3 convolution kernel
-__kernel void convolution2D(__global const uchar4* A, __global uchar4* B, __constant float* mask) {
+kernel void convolution2D(global const uchar4* A, global uchar4* B, constant float* mask) {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
 	int width = get_global_size(0); //width in pixels
