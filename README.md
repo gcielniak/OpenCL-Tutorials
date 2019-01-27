@@ -2,11 +2,7 @@
 
 ## Requirements
 
-### Tutorial 1-4
- - Windows 10, Visual Studio 2017
- - [Intel SDK for OpenCL](https://software.intel.com/en-us/intel-opencl)
- 
-With some small modifications, it should be possible to run it on different operating systems, programming environments and OpenCL SDKs. Tutorial 2 and 4 both depend on additional libraries (GLUT and Boost.Compute) with installation instructions for Windows presented below.
+The presented tutorials were developed and tested on Windows 10, Visual Studio 2017 and [Intel SDK for OpenCL](https://software.intel.com/en-us/intel-opencl). With some small modifications, however, it should be possible to run the tutorials on different operating systems, programming environments and OpenCL SDKs. Tutorial 2 and 4 both depend on additional libraries (GLUT and Boost.Compute) with installation instructions for Windows presented below.
 
 ### Tutorial 2
  - [GLUT](https://www.opengl.org/resources/libraries/glut/). The core library files together with Windows binaries are provided in the `Graphics` folder.  
