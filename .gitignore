@@ -6,9 +6,8 @@ build
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
-x86/
-build/
+x64/*
+x86/*
 bld/
 [Oo]bj/
 .vs
@@ -18,3 +17,8 @@ desktop.ini
 *.sdf
 *.suo
 *.user
+
+!x64/glut32.dll
+!x86/glut32.dll
+
+
