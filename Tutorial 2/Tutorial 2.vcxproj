@@ -31,7 +31,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9167FEE5-0E64-4275-B2B2-A3F87F3A5C8F}</ProjectGuid>
     <RootNamespace>Tutorial 1</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -131,7 +131,7 @@
       <Device>0</Device>
     </Intel_OpenCL_Build_Rules>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(INTELOCLSDKROOT)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(INTELOCLSDKROOT)include;.\Graphics\include\win32;.\Graphics\lodepng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__x86_64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -142,7 +142,7 @@
       <PrecompiledHeader />
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(INTELOCLSDKROOT)lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(INTELOCLSDKROOT)lib\x64;.\Graphics\lib\win64\glut;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
