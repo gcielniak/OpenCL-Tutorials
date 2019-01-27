@@ -149,7 +149,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>If exist "*.cl" copy "*.cl" "$(OutDir)\"</Command>
+      <Command>If exist "*.cl" copy "*.cl" "$(OutDir)"
+If exist "*.png" copy "*.png" "$(OutDir)"
+if exist "Graphics\bin\$(Platform)\glut32.dll" copy "Graphics\bin\$(Platform)\glut32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -173,7 +175,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>If exist "*.cl" copy "*.cl" "$(OutDir)\"</Command>
+      <Command>If exist "*.cl" copy "*.cl" "$(OutDir)"
+If exist "*.png" copy "*.png" "$(OutDir)"
+if exist "Graphics\bin\$(Platform)\glut32.dll" copy "Graphics\bin\$(Platform)\glut32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
