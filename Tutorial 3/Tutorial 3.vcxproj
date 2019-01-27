@@ -31,7 +31,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8CB4B79A-8170-44DE-88DC-C73EACB44CB2}</ProjectGuid>
     <RootNamespace>Tutorial 1</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -177,9 +177,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Tutorial 2\Exception.h" />
-    <ClInclude Include="..\Tutorial 2\Graphics\lodepng\lodepng.h" />
-    <ClInclude Include="..\Tutorial 2\ImageIO.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
