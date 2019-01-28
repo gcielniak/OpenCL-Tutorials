@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 			throw err;
 		}
 
-		//Part 4 - memory allocation
+		//Part 3 - memory allocation
 		//host - input
 		std::vector<int> A = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }; //C++11 allows this type of initialisation
 		std::vector<int> B = { 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 };
@@ -79,13 +79,13 @@ int main(int argc, char **argv) {
 		cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, vector_size);
 		cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, vector_size);
 
-		//Part 5 - device operations
+		//Part 4 - device operations
 
-		//5.1 Copy arrays A and B to device memory
+		//4.1 Copy arrays A and B to device memory
 		queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, vector_size, &A[0]);
 		queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, vector_size, &B[0]);
 
-		//5.2 Setup and execute the kernel (i.e. device code)
+		//4.2 Setup and execute the kernel (i.e. device code)
 		cl::Kernel kernel_add = cl::Kernel(program, "add");
 		kernel_add.setArg(0, buffer_A);
 		kernel_add.setArg(1, buffer_B);
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
 
 		queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(vector_elements), cl::NullRange);
 
-		//5.3 Copy the result from device to host
+		//4.3 Copy the result from device to host
 		queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, vector_size, &C[0]);
 
 		std::cout << "A = " << A << std::endl;
