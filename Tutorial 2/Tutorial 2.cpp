@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
 
 	//detect any potential exceptions
 	try {
+		//Part 2 - load images and setup processing variables
 		ImageIO::Init(argc, argv);
 
 		unsigned int image_width, image_height;
@@ -54,8 +55,8 @@ int main(int argc, char **argv) {
 												1.f / 9, 1.f / 9, 1.f / 9,
 												1.f / 9, 1.f / 9, 1.f / 9 };
 
-		//Part 2 - host operations
-		//2.1 Select computing devices
+		//Part 3 - host operations
+		//3.1 Select computing devices
 		cl::Context context = GetContext(platform_id, device_id);
 
 		//display the selected device
@@ -64,7 +65,7 @@ int main(int argc, char **argv) {
 		//create a queue to which we will push commands for the device
 		cl::CommandQueue queue(context);
 
-		//2.2 Load & build the device code
+		//3.2 Load & build the device code
 		cl::Program::Sources sources;
 
 		AddSources(sources, "my_kernels_2.cl");
@@ -82,18 +83,18 @@ int main(int argc, char **argv) {
 			throw err;
 		}
 
+		//Part 4 - device operations
+
 		//device - buffers
 		cl::Buffer dev_image_before(context, CL_MEM_READ_ONLY, image_before.size());
 		cl::Buffer dev_image_after(context, CL_MEM_READ_WRITE, image_after.size());
 		//cl::Buffer dev_convolution_mask(context, CL_MEM_READ_ONLY, convolution_mask.size()*sizeof(float));
 
-		//Part 5 - device operations
-
-		//5.1 Copy images to device memory
+		//4.1 Copy images to device memory
 		queue.enqueueWriteBuffer(dev_image_before, CL_TRUE, 0, image_before.size(), &image_before[0]);
 		//queue.enqueueWriteBuffer(dev_convolution_mask, CL_TRUE, 0, convolution_mask.size()*sizeof(float), &convolution_mask[0]);
 
-		//5.2 Setup and execute the kernel (i.e. device code)
+		//4.2 Setup and execute the kernel (i.e. device code)
 		cl::Kernel kernel = cl::Kernel(program, "identity");
 		kernel.setArg(0, dev_image_before);
 		kernel.setArg(1, dev_image_after);
@@ -101,7 +102,7 @@ int main(int argc, char **argv) {
 
 		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(image_width*image_height), cl::NullRange);
 
-		//5.3 Copy the result from device to host
+		//4.3 Copy the result from device to host
 		queue.enqueueReadBuffer(dev_image_after, CL_TRUE, 0, image_after.size(), &image_after[0]);
 
 		// loop until Esc is pressed
