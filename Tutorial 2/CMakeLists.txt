@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
-project("Tutorial 1")
+project("Tutorial 2")
 
-set(TARGET_NAME Tutorial_1)
+set(TARGET_NAME Tutorial_2)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -18,8 +18,8 @@ set (EXTRA_LIBRARIES ${EXTRA_LIBRARIES} ${OpenCL_LIBRARIES})
 
 set (SOURCES
 	../include/Utils.h
-	"src/Tutorial 1.cpp"
-	src/kernels/my_kernels_1.cl)
+	"src/Tutorial 2.cpp"
+	src/kernels/my_kernels_2.cl)
 
 include_directories(${EXTRA_INCLUDE_DIRS})
 link_directories(${EXTRA_LIBRARY_DIRS})
