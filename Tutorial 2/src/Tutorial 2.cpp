@@ -38,10 +38,8 @@ int main(int argc, char **argv) {
 
 	//detect any potential exceptions
 	try {
-		CImg<unsigned char> image_before("test.ppm");
-		CImgDisplay main_disp(image_before,"before");
-
-		std::vector<unsigned char> image_after;
+		CImg<unsigned char> image_input("test.ppm");
+		CImgDisplay disp_input(image_input,"input");
 
 		//a 3x3 convolution mask implementing an averaging filter
 		std::vector<float> convolution_mask = { 1.f / 9, 1.f / 9, 1.f / 9,
@@ -61,7 +59,7 @@ int main(int argc, char **argv) {
 		//3.2 Load & build the device code
 		cl::Program::Sources sources;
 
-		AddSources(sources, "my_kernels_2.cl");
+		AddSources(sources, "kernels/my_kernels_2.cl");
 
 		cl::Program program(context, sources);
 
@@ -79,27 +77,32 @@ int main(int argc, char **argv) {
 		//Part 4 - device operations
 
 		//device - buffers
-		cl::Buffer dev_image_before(context, CL_MEM_READ_ONLY, image_before.size());
-		cl::Buffer dev_image_after(context, CL_MEM_READ_WRITE, image_after.size());
+		cl::Buffer dev_image_input(context, CL_MEM_READ_ONLY, image_input.size());
+		cl::Buffer dev_image_output(context, CL_MEM_READ_WRITE, image_input.size()); //should be the same as input image
 		//cl::Buffer dev_convolution_mask(context, CL_MEM_READ_ONLY, convolution_mask.size()*sizeof(float));
 
 		//4.1 Copy images to device memory
-		queue.enqueueWriteBuffer(dev_image_before, CL_TRUE, 0, image_before.size(), &image_before[0]);
+		queue.enqueueWriteBuffer(dev_image_input, CL_TRUE, 0, image_input.size(), &image_input.data()[0]);
 		//queue.enqueueWriteBuffer(dev_convolution_mask, CL_TRUE, 0, convolution_mask.size()*sizeof(float), &convolution_mask[0]);
 
 		//4.2 Setup and execute the kernel (i.e. device code)
 		cl::Kernel kernel = cl::Kernel(program, "identity");
-		kernel.setArg(0, dev_image_before);
-		kernel.setArg(1, dev_image_after);
+		kernel.setArg(0, dev_image_input);
+		kernel.setArg(1, dev_image_output);
 		//kernel.setArg(2, dev_convolution_mask);
 
-		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(image_before.width()*image_before.height()), cl::NullRange);
+		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(image_input.width()*image_input.height()), cl::NullRange);
 
+		vector<unsigned char> output_buffer(image_input.size());
 		//4.3 Copy the result from device to host
-		queue.enqueueReadBuffer(dev_image_after, CL_TRUE, 0, image_after.size(), &image_after[0]);
+		queue.enqueueReadBuffer(dev_image_output, CL_TRUE, 0, output_buffer.size(), &output_buffer.data()[0]);
 
- 		while (!main_disp.is_closed()) {
-		    main_disp.wait();
+		CImg<unsigned char> output_image(output_buffer.data(), output_buffer.width(), output_buffer.height(), output_buffer.depth(), output_buffer.spectrum());
+		CImgDisplay disp_output(output_image,"output");
+
+ 		while (!disp_input.is_closed() && !disp_output.is_closed()) {
+		    disp_input.wait();
+		    disp_output.wait();
 	    }		
 
 	}
