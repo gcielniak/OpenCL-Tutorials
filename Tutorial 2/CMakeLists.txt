@@ -42,10 +42,20 @@ add_custom_command(TARGET ${TARGET_NAME} PRE_BUILD
                    "${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/"
                    $<TARGET_FILE_DIR:${TARGET_NAME}>/kernels/)
 
+add_custom_command(TARGET ${TARGET_NAME} PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   "${CMAKE_SOURCE_DIR}/images"
+                   $<TARGET_FILE_DIR:${TARGET_NAME}>)
+
 #additional command to copy kernels into a working directory allowing debugging directly from VS				   
 if (MSVC)
 add_custom_command(TARGET ${TARGET_NAME} PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                    "${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/"
                    kernels)
+
+add_custom_command(TARGET ${TARGET_NAME} PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   "${CMAKE_SOURCE_DIR}/images"
+                   .)
 endif(MSVC)
