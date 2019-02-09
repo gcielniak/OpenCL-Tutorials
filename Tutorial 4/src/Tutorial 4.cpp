@@ -1,8 +1,8 @@
+#include "Utils.h"
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <boost/compute.hpp>
-#include "Utils.h"
 
 namespace compute = boost::compute;
 using namespace std;
