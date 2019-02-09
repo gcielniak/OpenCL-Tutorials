@@ -2,20 +2,10 @@
 #include <vector>
 #include <algorithm>
 #include <boost/compute.hpp>
+#include "Utils.h"
 
 namespace compute = boost::compute;
 using namespace std;
-
-//print out stl vectors
-template <typename T>
-ostream& operator<< (ostream& out, const vector<T>& v) {
-	if (!v.empty()) {
-		out << '[';
-		copy(v.begin(), v.end(), ostream_iterator<T>(out, ", "));
-		out << "\b\b]";
-	}
-	return out;
-}
 
 int main() {
 	typedef int mytype;

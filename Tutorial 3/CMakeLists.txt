@@ -19,7 +19,7 @@ set (EXTRA_LIBRARIES ${EXTRA_LIBRARIES} ${OpenCL_LIBRARIES})
 set (SOURCES
 	../include/Utils.h
 	"src/Tutorial 3.cpp"
-	src/kernels/my_kernels_3.cl)
+	src/kernels/my_kernels.cl)
 
 include_directories(${EXTRA_INCLUDE_DIRS})
 link_directories(${EXTRA_LIBRARY_DIRS})

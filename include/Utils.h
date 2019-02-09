@@ -5,10 +5,14 @@
 #include <iostream>
 #include <sstream>
 
+#define CL_HPP_ENABLE_EXCEPTIONS
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+#define CL_HPP_TARGET_OPENCL_VERSION 120
+
 #ifdef __APPLE__
-#include <OpenCL/cl.hpp>
+#include <OpenCL/cl2.hpp>
 #else
-#include <CL/cl.hpp>
+#include <CL/cl2.hpp>
 #endif
 
 using namespace std;
@@ -124,7 +128,7 @@ void AddSources(cl::Program::Sources& sources, const string& file_name) {
 	//TODO: add file existence check
 	ifstream file(file_name);
 	string* source_code = new string(istreambuf_iterator<char>(file), (istreambuf_iterator<char>()));
-	sources.push_back(make_pair((*source_code).c_str(), source_code->length() + 1));
+	sources.push_back((*source_code).c_str());
 }
 
 string ListPlatformsDevices() {

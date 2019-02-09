@@ -1,14 +1,5 @@
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#define __CL_ENABLE_EXCEPTIONS
-
 #include <iostream>
 #include <vector>
-
-#ifdef __APPLE__
-#include <OpenCL/cl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
 
 #include "Utils.h"
 
@@ -30,7 +21,7 @@ int main(int argc, char **argv) {
 		if ((strcmp(argv[i], "-p") == 0) && (i < (argc - 1))) { platform_id = atoi(argv[++i]); }
 		else if ((strcmp(argv[i], "-d") == 0) && (i < (argc - 1))) { device_id = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-l") == 0) { std::cout << ListPlatformsDevices() << std::endl; }
-		else if (strcmp(argv[i], "-h") == 0) { print_help(); }
+		else if (strcmp(argv[i], "-h") == 0) { print_help(); return 0; }
 	}
 
 	//detect any potential exceptions
@@ -48,7 +39,7 @@ int main(int argc, char **argv) {
 		//2.2 Load & build the device code
 		cl::Program::Sources sources;
 
-		AddSources(sources, "kernels/my_kernels_1.cl");
+		AddSources(sources, "kernels/my_kernels.cl");
 
 		cl::Program program(context, sources);
 

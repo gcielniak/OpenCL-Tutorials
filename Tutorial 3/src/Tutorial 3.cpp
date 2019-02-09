@@ -1,14 +1,5 @@
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#define __CL_ENABLE_EXCEPTIONS
-
 #include <iostream>
 #include <vector>
-
-#ifdef __APPLE__
-#include <OpenCL/cl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
 
 #include "Utils.h"
 
@@ -48,7 +39,7 @@ int main(int argc, char **argv) {
 		//2.2 Load & build the device code
 		cl::Program::Sources sources;
 
-		AddSources(sources, "kernels/my_kernels_3.cl");
+		AddSources(sources, "kernels/my_kernels.cl");
 
 		cl::Program program(context, sources);
 

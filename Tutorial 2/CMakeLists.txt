@@ -28,7 +28,7 @@ endif (NOT MSVC)
 set (SOURCES
 	../include/Utils.h
 	"src/Tutorial 2.cpp"
-	src/kernels/my_kernels_2.cl)
+	src/kernels/my_kernels.cl)
 
 include_directories(${EXTRA_INCLUDE_DIRS})
 link_directories(${EXTRA_LIBRARY_DIRS})
