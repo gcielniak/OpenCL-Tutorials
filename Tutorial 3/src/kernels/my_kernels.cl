@@ -105,6 +105,24 @@ kernel void hist_simple(global const int* A, global int* H) {
 	atomic_inc(&H[bin_index]);//serial operation, not very efficient!
 }
 
+//Hillis-Steele basic inclusive scan
+//requires additional buffer B to avoid data overwrite 
+kernel void scan_hs(global int* A, global int* B) {
+	int id = get_global_id(0);
+	int N = get_global_size(0);
+	global int* C;
+
+	for (int stride = 1; stride < N; stride *= 2) {
+		B[id] = A[id];
+		if (id >= stride)
+			B[id] += A[id - stride];
+
+		barrier(CLK_GLOBAL_MEM_FENCE); //sync the step
+
+		C = A; A = B; B = A; //swap A & B between steps
+	}
+}
+
 //a double-buffered version of the Hillis-Steele inclusive scan
 //requires two additional input arguments which correspond to two local buffers
 kernel void scan_add(__global const int* A, global int* B, local int* scratch_1, local int* scratch_2) {
@@ -136,21 +154,35 @@ kernel void scan_add(__global const int* A, global int* B, local int* scratch_1,
 	B[id] = scratch_1[lid];
 }
 
-//requires additional buffer B to avoid data overwrite 
-kernel void scan_hs(global int* A, global int* B) {
-   int id = get_global_id(0);
-   int N = get_global_size(0);
-   global int* C; 
+//Blelloch basic inclusive scan
+kernel void scan_bl(global int* A) {
+	int id = get_global_id(0);
+	int N = get_global_size(0);
+	int t;
 
-   for (int stride=1; stride<N; stride*=2) {
-      B[id] = A[id];
-      if (id >= stride)
-         B[id] += A[id-stride];
-      
-      barrier(CLK_GLOBAL_MEM_FENCE); //sync the step
-      
-      C = A; A = B; B = A; //swap A & B between steps
-   }
+	//up-sweep
+	for (int stride = 1; stride < N; stride *= 2) {
+		if (((id + 1) % (stride*2)) == 0)
+			A[id] += A[id - stride];
+
+		barrier(CLK_GLOBAL_MEM_FENCE); //sync the step
+	}
+
+	//down-sweep
+	if (id == 0)
+		A[N-1] = A[0];//or 0 for exclusive scan
+
+	barrier(CLK_GLOBAL_MEM_FENCE); //sync the step
+
+	for (int stride = N/2; stride > 0; stride /= 2) {
+		if (((id + 1) % (stride*2)) == 0) {
+			t = A[id];
+			A[id] += A[id - stride]; //reduce 
+			A[id - stride] = t;		 //move
+		}
+
+		barrier(CLK_GLOBAL_MEM_FENCE); //sync the step
+	}
 }
 
 //calculates the block sums
