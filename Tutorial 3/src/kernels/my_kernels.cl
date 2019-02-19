@@ -136,6 +136,23 @@ kernel void scan_add(__global const int* A, global int* B, local int* scratch_1,
 	B[id] = scratch_1[lid];
 }
 
+//requires additional buffer B to avoid data overwrite 
+kernel void scan_hs(global int* A, global int* B) {
+   int id = get_global_id(0);
+   int N = get_global_size(0);
+   global int* C; 
+
+   for (int stride=1; stride<N; stride*=2) {
+      B[id] = A[id];
+      if (id >= stride)
+         B[id] += A[id-stride];
+      
+      barrier(CLK_GLOBAL_MEM_FENCE); //sync the step
+      
+      C = A; A = B; B = A; //swap A & B between steps
+   }
+}
+
 //calculates the block sums
 kernel void block_sum(global const int* A, global int* B, int local_size) {
 	int id = get_global_id(0);
