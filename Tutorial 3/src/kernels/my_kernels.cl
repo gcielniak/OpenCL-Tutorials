@@ -154,7 +154,7 @@ kernel void scan_add(__global const int* A, global int* B, local int* scratch_1,
 	B[id] = scratch_1[lid];
 }
 
-//Blelloch basic inclusive scan
+//Blelloch basic exclusive scan
 kernel void scan_bl(global int* A) {
 	int id = get_global_id(0);
 	int N = get_global_size(0);
@@ -170,7 +170,7 @@ kernel void scan_bl(global int* A) {
 
 	//down-sweep
 	if (id == 0)
-		A[N-1] = A[0];//or 0 for exclusive scan
+		A[N-1] = 0;//exclusive scan
 
 	barrier(CLK_GLOBAL_MEM_FENCE); //sync the step
 
