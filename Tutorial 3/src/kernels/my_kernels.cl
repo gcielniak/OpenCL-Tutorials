@@ -119,7 +119,7 @@ kernel void scan_hs(global int* A, global int* B) {
 
 		barrier(CLK_GLOBAL_MEM_FENCE); //sync the step
 
-		C = A; A = B; B = A; //swap A & B between steps
+		C = A; A = B; B = C; //swap A & B between steps
 	}
 }
 
