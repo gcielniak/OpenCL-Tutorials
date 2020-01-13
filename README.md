@@ -4,7 +4,7 @@
 
 The presented tutorials were developed and tested on Windows 10, Visual Studio 2019 and [Intel SDK for OpenCL](https://software.intel.com/en-us/intel-opencl) so that can be run on Windows PCs in the computing labs. Tutorial 4 also depends on the Boost library. If you would like to develop OpenCL programs on your computer you have two options:
  - replicate the [Windows setup](#windows-setup) from the computing labs;
- - use the [multi_os](https://github.com/gcielniak/OpenCL-Tutorials/tree/multi_os) branch, which should allow to run the tutorials on different operating systems, programming environments and OpenCL SDKs. There is limited documentation for this option, however, so you should only choose that option if you are comfortable with installing custom libraries on your specific OS.
+ - use the [multi_os](https://github.com/gcielniak/OpenCL-Tutorials/tree/multi_os) branch, which should allow for running the tutorials on different operating systems, programming environments and OpenCL SDKs. There is limited documentation for this option, however, so you should only choose that option if you are comfortable with installing custom libraries on your specific OS.
  
 ## Windows Setup
  - Windows 10, Visual Studio 2019
