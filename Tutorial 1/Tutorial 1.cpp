@@ -1,14 +1,5 @@
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#define __CL_ENABLE_EXCEPTIONS
-
 #include <iostream>
 #include <vector>
-
-#ifdef __APPLE__
-#include <OpenCL/cl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
 
 #include "Utils.h"
 
@@ -30,7 +21,7 @@ int main(int argc, char **argv) {
 		if ((strcmp(argv[i], "-p") == 0) && (i < (argc - 1))) { platform_id = atoi(argv[++i]); }
 		else if ((strcmp(argv[i], "-d") == 0) && (i < (argc - 1))) { device_id = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-l") == 0) { std::cout << ListPlatformsDevices() << std::endl; }
-		else if (strcmp(argv[i], "-h") == 0) { print_help(); return 0;}
+		else if (strcmp(argv[i], "-h") == 0) { print_help(); return 0; }
 	}
 
 	//detect any potential exceptions
@@ -40,7 +31,7 @@ int main(int argc, char **argv) {
 		cl::Context context = GetContext(platform_id, device_id);
 
 		//display the selected device
-		std::cout << "Running on " << GetPlatformName(platform_id) << ", " << GetDeviceName(platform_id, device_id) << std::endl;
+		std::cout << "Runinng on " << GetPlatformName(platform_id) << ", " << GetDeviceName(platform_id, device_id) << std::endl;
 
 		//create a queue to which we will push commands for the device
 		cl::CommandQueue queue(context);
@@ -48,7 +39,7 @@ int main(int argc, char **argv) {
 		//2.2 Load & build the device code
 		cl::Program::Sources sources;
 
-		AddSources(sources, "my_kernels_1.cl");
+		AddSources(sources, "kernels/my_kernels.cl");
 
 		cl::Program program(context, sources);
 
@@ -63,7 +54,7 @@ int main(int argc, char **argv) {
 			throw err;
 		}
 
-		//Part 3 - memory allocation
+		//Part 4 - memory allocation
 		//host - input
 		std::vector<int> A = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }; //C++11 allows this type of initialisation
 		std::vector<int> B = { 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 };
@@ -79,13 +70,13 @@ int main(int argc, char **argv) {
 		cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, vector_size);
 		cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, vector_size);
 
-		//Part 4 - device operations
+		//Part 5 - device operations
 
-		//4.1 Copy arrays A and B to device memory
+		//5.1 Copy arrays A and B to device memory
 		queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, vector_size, &A[0]);
 		queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, vector_size, &B[0]);
 
-		//4.2 Setup and execute the kernel (i.e. device code)
+		//5.2 Setup and execute the kernel (i.e. device code)
 		cl::Kernel kernel_add = cl::Kernel(program, "add");
 		kernel_add.setArg(0, buffer_A);
 		kernel_add.setArg(1, buffer_B);
@@ -93,7 +84,7 @@ int main(int argc, char **argv) {
 
 		queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(vector_elements), cl::NullRange);
 
-		//4.3 Copy the result from device to host
+		//5.3 Copy the result from device to host
 		queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, vector_size, &C[0]);
 
 		std::cout << "A = " << A << std::endl;

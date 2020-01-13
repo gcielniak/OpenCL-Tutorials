@@ -1,29 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClCompile Include="Tutorial 3.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{7dd23633-ac32-4744-ac4e-12d605e18d7c}</UniqueIdentifier>
+    <Filter Include="kernels">
+      <UniqueIdentifier>{bc7a8fec-44e6-4521-a22b-e4595d5b0ed1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OpenCL Files">
-      <UniqueIdentifier>{fa0121f4-d3c1-47a1-bd81-e2502fd41069}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4b8b099e-fa6a-4e89-9637-1f8578fc3fd6}</UniqueIdentifier>
+    <Filter Include="include">
+      <UniqueIdentifier>{84aac619-8794-4eec-81d5-212689c31225}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="my_kernels_3.cl">
-      <Filter>OpenCL Files</Filter>
+    <None Include="kernels\my_kernels.cl">
+      <Filter>kernels</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Tutorial 3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClInclude Include="..\include\Utils.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
