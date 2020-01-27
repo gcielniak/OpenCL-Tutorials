@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # specify our compiled binaries name
 set(BINARY_NAME tut1)
 # specify all our cpp files names
-set(CPP_FILES main.cpp)
+set(CPP_FILES tut1.cpp)
 
 # build our project executable, and link opencl lib
 find_package(OpenCL REQUIRED)
