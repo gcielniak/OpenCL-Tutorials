@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-mkdir build
+mkdir -p build
 cd build/
 cmake ..
 make
