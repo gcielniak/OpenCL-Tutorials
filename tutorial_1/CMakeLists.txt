@@ -11,6 +11,6 @@ set(BINARY_NAME tut1)
 set(CPP_FILES tut1.cpp)
 
 # build our project executable, and link opencl lib
-find_package(OpenCL REQUIRED)
+find_package(OpenCL 2 REQUIRED)
 add_executable(${BINARY_NAME} ${CPP_FILES})
 target_link_libraries(tut1 OpenCL::OpenCL)
