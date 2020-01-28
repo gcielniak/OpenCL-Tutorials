@@ -1,5 +1,5 @@
 # ignore everything using whitelist strategy
 # *
-
+build/
 # you can selectiveley allow files using the ! at the beginning of the line
 #!lib/**/*.py # this would allow all python files in subdirectories of lib if enabled
