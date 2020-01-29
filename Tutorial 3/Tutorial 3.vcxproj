@@ -149,6 +149,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /s /i /y "kernels" "$(OutDir)kernels"</Command>
@@ -173,6 +174,7 @@
       <AdditionalLibraryDirectories>$(INTELOCLSDKROOT)lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /s /i /y "kernels" "$(OutDir)kernels"</Command>
