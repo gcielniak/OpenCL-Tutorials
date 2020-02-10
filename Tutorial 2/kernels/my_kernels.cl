@@ -9,6 +9,7 @@ kernel void filter_r(global const uchar* A, global uchar* B) {
 	int image_size = get_global_size(0)/3; //each image consists of 3 colour channels
 	int colour_channel = id / image_size; // 0 - red, 1 - green, 2 - blue
 
+	//this is just a copy operation, modify to filter out the individual colour channels
 	B[id] = A[id];
 }
 
@@ -29,7 +30,7 @@ kernel void identityND(global const uchar* A, global uchar* B) {
 }
 
 //2D averaging filter
-kernel void avg_filter2D(global const uchar* A, global uchar* B) {
+kernel void avg_filterND(global const uchar* A, global uchar* B) {
 	int width = get_global_size(0); //image width in pixels
 	int height = get_global_size(1); //image height in pixels
 	int image_size = width*height; //image size in pixels
@@ -41,7 +42,7 @@ kernel void avg_filter2D(global const uchar* A, global uchar* B) {
 
 	int id = x + y*width + c*image_size; //global id in 1D space
 
-	ushort result = 0;
+	uint result = 0;
 
 	for (int i = (x-1); i <= (x+1); i++)
 	for (int j = (y-1); j <= (y+1); j++) 
@@ -53,7 +54,7 @@ kernel void avg_filter2D(global const uchar* A, global uchar* B) {
 }
 
 //2D 3x3 convolution kernel
-kernel void convolution2D(global const uchar* A, global uchar* B, constant float* mask) {
+kernel void convolutionND(global const uchar* A, global uchar* B, constant float* mask) {
 	int width = get_global_size(0); //image width in pixels
 	int height = get_global_size(1); //image height in pixels
 	int image_size = width*height; //image size in pixels
@@ -65,7 +66,7 @@ kernel void convolution2D(global const uchar* A, global uchar* B, constant float
 
 	int id = x + y*width + c*image_size; //global id in 1D space
 
-	ushort result = 0;
+	float result = 0;
 
 	for (int i = (x-1); i <= (x+1); i++)
 	for (int j = (y-1); j <= (y+1); j++) 

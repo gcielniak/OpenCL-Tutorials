@@ -82,12 +82,12 @@ int main(int argc, char **argv) {
 //		queue.enqueueWriteBuffer(dev_convolution_mask, CL_TRUE, 0, convolution_mask.size()*sizeof(float), &convolution_mask[0]);
 
 		//4.2 Setup and execute the kernel (i.e. device code)
-		cl::Kernel kernel = cl::Kernel(program, "identityND");
+		cl::Kernel kernel = cl::Kernel(program, "identity");
 		kernel.setArg(0, dev_image_input);
 		kernel.setArg(1, dev_image_output);
 //		kernel.setArg(2, dev_convolution_mask);
 
-		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(image_input.width(), image_input.height(), image_input.spectrum()), cl::NullRange);
+		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(image_input.size()), cl::NullRange);
 
 		vector<unsigned char> output_buffer(image_input.size());
 		//4.3 Copy the result from device to host
