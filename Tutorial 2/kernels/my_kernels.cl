@@ -43,11 +43,16 @@ kernel void avg_filter2D(global const uchar* A, global uchar* B) {
 
 	ushort result = 0;
 
-	for (int i = (x-1); i <= (x+1); i++)
-	for (int j = (y-1); j <= (y+1); j++) 
-		result += A[i + j*width + c*image_size];
+	//simple boundary handling - just copy the original pixel
+	if ((x == 0) || (x == width-1) || (y == 0) || (y == height-1)) {
+		result = A[id];	
+	} else {
+		for (int i = (x-1); i <= (x+1); i++)
+		for (int j = (y-1); j <= (y+1); j++) 
+			result += A[i + j*width + c*image_size];
 
-	result /= 9;
+		result /= 9;
+	}
 
 	B[id] = (uchar)result;
 }
@@ -67,9 +72,14 @@ kernel void convolution2D(global const uchar* A, global uchar* B, constant float
 
 	ushort result = 0;
 
-	for (int i = (x-1); i <= (x+1); i++)
-	for (int j = (y-1); j <= (y+1); j++) 
-		result += A[i + j*width + c*image_size]*mask[i-(x-1) + j-(y-1)];
+	//simple boundary handling - just copy the original pixel
+	if ((x == 0) || (x == width-1) || (y == 0) || (y == height-1)) {
+		result = A[id];	
+	} else {
+		for (int i = (x-1); i <= (x+1); i++)
+		for (int j = (y-1); j <= (y+1); j++) 
+			result += A[i + j*width + c*image_size]*mask[i-(x-1) + j-(y-1)];
+	}
 
 	B[id] = (uchar)result;
 }
