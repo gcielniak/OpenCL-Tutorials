@@ -195,7 +195,7 @@ kernel void block_sum(global const int* A, global int* B, int local_size) {
 kernel void scan_add_atomic(global int* A, global int* B) {
 	int id = get_global_id(0);
 	int N = get_global_size(0);
-	for (int i = id+1; i < N; i++)
+	for (int i = id+1; i < N && id < N; i++)
 		atomic_add(&B[i], A[id]);
 }
 
